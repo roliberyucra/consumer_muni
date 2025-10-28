@@ -3,7 +3,7 @@
 
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h3>Mis Tokens</h3>
-    <a href="index.php?action=newTokenForm" class="btn btn-success btn-sm">+ Nuevo Token</a>
+<!-- <a href="index.php?action=newTokenForm" class="btn btn-success btn-sm">+ Nuevo Token</a> -->
 </div>
 
 <table class="table table-striped table-bordered bg-white shadow-sm">

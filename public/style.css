@@ -1,0 +1,12 @@
+:root {
+    --main: #197b7d;
+}
+
+.btn-main {
+    background: var(--main) !important;
+    color:white !important;
+}
+
+.btn-main:hover{
+    opacity:.85;
+}
