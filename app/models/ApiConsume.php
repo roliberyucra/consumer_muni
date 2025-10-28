@@ -3,7 +3,7 @@
 class ApiConsume {
 
     private $pdo;
-    private $apiBase = "https://muni.serviciosvirtuales.com.pe/api.php";
+    private $apiBase = "";
 
     public function __construct($pdo) {
         $this->pdo = $pdo;

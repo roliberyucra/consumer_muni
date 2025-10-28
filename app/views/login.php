@@ -13,7 +13,7 @@
 
         <!-- columna imagen -->
         <div class="col-md-7 d-none d-md-block p-0">
-            <div style="background:url('hhttps://images.unsplash.com/photo-1616312485781-2707a48b3af9?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8Ym13JTIwY2wlQzMlQTFzaWNvfGVufDB8fDB8fHww&fm=jpg&q=60&w=3000');background-size:cover;background-position:center;width:100%;height:100%;">
+            <div style="background:url('https://ledwords.eu/wp-content/uploads/2023/04/M.jpg');background-size:cover;background-position:center;width:100%;height:100%;">
             </div>
         </div>
 
