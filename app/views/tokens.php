@@ -1,43 +1,41 @@
 <?php ob_start(); ?>
-<?php $title = "Token Activo"; ?>
+<?php $title = "Último Token"; ?>
 
 <?php
-// CONSULTAR TOKEN ACTIVO EN EL API
-$ch = curl_init("https://www.muni.serviciosvirtuales.com.pe/muni/api.php?tipo=getActiveToken");
+$ch = curl_init("https://www.muni.serviciosvirtuales.com.pe/muni/api.php?tipo=getLastToken");
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 $response = curl_exec($ch);
 curl_close($ch);
 
-$json = json_decode($response, true);
+$json = json_decode($response,true);
 ?>
 
-<h3>Token Activo</h3>
+<h3>Último Token Registrado</h3>
 <hr>
 
-<?php if($json["status"]==true): ?>
+<?php if($json && $json["status"]==true): ?>
 
-<div class="alert alert-success shadow-sm">
-    <b>Token Actual:</b><br>
+<div class="alert alert-info shadow-sm">
+    <b>Token:</b><br>
     <code style="font-size:18px"><?= $json["token"] ?></code>
+    <br><br>
+    <b>Estado:</b> <?= ($json["estado"]==1?"Activo":"Inactivo") ?><br>
+    <b>Expiración:</b> <?= $json["expiracion"] ?>
 </div>
 
-<p>
-    <a href="index.php?action=solicitarToken" class="btn btn-warning">
-        Generar Nuevo Token
-    </a>
-</p>
+<a href="index.php?action=solicitarToken" class="btn btn-success">
+    Generar Token Nuevo
+</a>
 
 <?php else: ?>
 
 <div class="alert alert-danger shadow-sm">
-    No hay tokens activos actualmente.
+    No hay tokens generados todavía
 </div>
 
-<p>
-    <a href="index.php?action=solicitarToken" class="btn btn-success">
-        Generar Token Ahora
-    </a>
-</p>
+<a href="index.php?action=solicitarToken" class="btn btn-primary">
+    Generar Token Ahora
+</a>
 
 <?php endif; ?>
 
