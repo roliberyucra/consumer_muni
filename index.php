@@ -15,6 +15,42 @@ $action = $_GET['action'] ?? 'loginForm';
 
 switch($action){
 
+    case 'solicitarToken':
+    if (!isset($_SESSION['user'])) {
+        header("Location: index.php?action=loginForm");
+        exit;
+    }
+
+    $ch = curl_init("https://www.muni.serviciosvirtuales.com.pe/api.php");
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, [
+        "tipo" => "generarToken"
+    ]);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+    $response = curl_exec($ch);
+    curl_close($ch);
+
+    $json = json_decode($response, true);
+
+if(!is_array($json)){
+    $mensaje = "No hubo respuesta válida del servidor API";
+    include __DIR__."/app/views/home.php";
+    break;
+}
+
+if(isset($json["status"]) && $json["status"] == true){
+    $_SESSION['ultimo_token'] = $json["token"] ?? "";
+    $mensaje = "Token generado correctamente!";
+} else {
+    $mensaje = $json["msg"] ?? "Error desconocido al generar token";
+}
+
+include __DIR__."/app/views/home.php";
+break;
+
+
+
     case 'tokens':
         if (!isset($_SESSION['user'])) {
             header("Location: index.php?action=loginForm");

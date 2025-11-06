@@ -11,8 +11,15 @@
   </div>
 </nav>
 
+<?php if(isset($_SESSION['ultimo_token'])): ?>
+<div class="alert alert-info text-center mx-5">
+    <b>Token actual generado:</b> <?= $_SESSION['ultimo_token'] ?>
+</div>
+<?php endif; ?>
 
 <div class="row justify-content-center">
+
+    <a href="index.php?action=solicitarToken" class="btn btn-success">Solicitar Token</a>
 
     <div class="col-md-4">
         <div class="card text-center shadow-sm">
