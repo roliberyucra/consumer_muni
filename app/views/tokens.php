@@ -1,46 +1,34 @@
 <?php ob_start(); ?>
-<?php $title = "Token Activo"; ?>
+<?php $title = "Mis Tokens"; ?>
 
-<?php
-// CONSULTAR TOKEN ACTIVO EN EL API
-$ch = curl_init("https://www.muni.serviciosvirtuales.com.pe/muni/api.php?tipo=getActiveToken");
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-$response = curl_exec($ch);
-curl_close($ch);
-
-$json = json_decode($response, true);
-?>
-
-<h3>Token Activo</h3>
-<hr>
-
-<?php if($json["status"]==true): ?>
-
-<div class="alert alert-success shadow-sm">
-    <b>Token Actual:</b><br>
-    <code style="font-size:18px"><?= $json["token"] ?></code>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h3>Mis Tokens</h3>
+<!-- <a href="index.php?action=newTokenForm" class="btn btn-success btn-sm">+ Nuevo Token</a> -->
 </div>
 
-<p>
-    <a href="index.php?action=solicitarToken" class="btn btn-warning">
-        Generar Nuevo Token
-    </a>
-</p>
+<table class="table table-striped table-bordered bg-white shadow-sm">
+    <thead class="table-dark">
+    <tr>
+        <th>ID</th>
+        <th>Token</th>
+        <th class="text-center">Acción</th>
+    </tr>
+    </thead>
 
-<?php else: ?>
-
-<div class="alert alert-danger shadow-sm">
-    No hay tokens activos actualmente.
-</div>
-
-<p>
-    <a href="index.php?action=solicitarToken" class="btn btn-success">
-        Generar Token Ahora
-    </a>
-</p>
-
-<?php endif; ?>
-
+    <tbody>
+    <?php foreach($tokens as $t){ ?>
+    <tr>
+        <td><?= $t['id'] ?></td>
+        <td><?= $t['token'] ?></td>
+        <td class="text-center">
+            <a href="index.php?action=editTokenForm&id=<?= $t['id'] ?>" class="btn btn-primary btn-sm">
+                Editar
+            </a>
+        </td>
+    </tr>
+    <?php } ?>
+    </tbody>
+</table>
 
 <a href="index.php?action=home" class="btn btn-secondary mt-3">Volver</a>
 
