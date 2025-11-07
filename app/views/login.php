@@ -9,17 +9,18 @@
         body{
             margin:0;
             padding:0;
-            background:url('https://benecar.pt/storage/355191/conversions/01JGNSJGBZ2PT34ZW8A0B0SH5M-webp.webp');
+            background:url('https://wallpapers.com/images/hd/4k-bmw-car-in-dark-c0ot64ri2fecu1pr.jpg');
             background-size:cover;
             background-position:center;
             height:100vh;
             display:flex;
             align-items:center;
             justify-content:center;
-            backdrop-filter: blur(3px);
+            backdrop-filter: blur(1px);
         }
 
         .login-card{
+            color: white;
             background: rgba(255,255,255,.25);
             border-radius: 14px;
             padding:35px;
@@ -36,6 +37,8 @@
         }
         .btn-main:hover{
             opacity:.85;
+            background: white;
+            color: #197b7d;
         }
     </style>
 </head>
