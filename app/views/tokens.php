@@ -8,30 +8,25 @@
 
 <h2>Tokens Registrados</h2>
 
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Token</th>
-            <th>Fecha Registro</th>
-        </tr>
-    </thead>
-    <tbody>
-    <?php if(count($tokens) > 0): ?>
-        <?php foreach($tokens as $t): ?>
-        <tr>
-            <td><?= $t['id'] ?></td>
-            <td><?= $t['token'] ?></td>
-            <td><?= $t['fecha_registro'] ?></td>
-        </tr>
-        <?php endforeach;?>
-    <?php else: ?>
-        <tr>
-            <td colspan="3">No tienes tokens guardados</td>
-        </tr>
-    <?php endif;?>
-    </tbody>
+<table table bordered>
+<tr>
+    <th>ID</th>
+    <th>Token</th>
+    <th>Acción</th>
+</tr>
+
+<?php foreach($tokens as $t){ ?>
+<tr>
+    <td><?= $t['id'] ?></td>
+    <td><?= $t['token'] ?></td>
+    <td>
+        <a href="index.php?action=editTokenForm&id=<?= $t['id'] ?>">Editar</a>
+    </td>
+</tr>
+<?php } ?>
+
 </table>
+
 
 <a href="index.php?action=home" class="btn btn-secondary">Volver</a>
 

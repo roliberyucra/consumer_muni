@@ -68,6 +68,42 @@ switch($action){
             }
         
             break;
+
+        case 'editTokenForm':
+    if (!isset($_SESSION['user'])) {
+        header("Location: index.php?action=loginForm");
+        exit;
+    }
+
+    $id = $_GET['id'];
+
+    $stmt = $pdo->prepare("SELECT * FROM tokens_consumer WHERE id=? AND id_usuario=?");
+    $stmt->execute([$id, $_SESSION['user']['id']]);
+    $token_bd = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    include __DIR__."/app/views/edit_token.php";
+    break;
+
+
+case 'updateToken':
+    if (!isset($_SESSION['user'])) {
+        header("Location: index.php?action=loginForm");
+        exit;
+    }
+
+    if($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+        $id    = $_POST['id'];
+        $token = trim($_POST['token']);
+
+        $stmt = $pdo->prepare("UPDATE tokens_consumer SET token=? WHERE id=? AND id_usuario=?");
+        $stmt->execute([$token, $id, $_SESSION['user']['id']]);
+
+        header("Location: index.php?action=tokens");
+        exit;
+    }
+    break;
+
         
         
     
