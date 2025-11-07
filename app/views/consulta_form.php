@@ -1,60 +1,96 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Consulta de Municipios</title>
-</head>
-<body>
+<?php ob_start(); ?>
+<?php $title = "Consulta de Municipios"; ?>
 
-<h2>Consultar Municipios</h2>
+<nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm mb-4">
+  <div class="container-fluid">
+    <span class="navbar-brand">Consumer API</span>
+    <div class="d-flex">
+        <a href="index.php?action=home" class="btn btn-outline-secondary btn-sm me-2">Inicio</a>
+        <a href="index.php?action=logout" class="btn btn-outline-danger btn-sm">Salir</a>
+    </div>
+  </div>
+</nav>
 
-<form action="index.php?action=consultarMunicipiosRequest" method="POST">
+<div class="container">
 
-    <label>Token:</label><br>
-    <input type="text" name="token" placeholder="Ingresa tu token" required><br><br>
+    <div class="row justify-content-center">
+        <div class="col-md-7">
 
-    <label>Departamento:</label><br>
-    <input type="text" name="departamento" placeholder="LIMA" required><br><br>
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    Consultar Municipios
+                </div>
+                <div class="card-body">
 
-    <button type="submit">Consultar</button>
+                    <form action="index.php?action=consultarMunicipiosRequest" method="POST">
 
-</form>
+                        <div class="mb-3">
+                            <label class="form-label">Token</label>
+                            <input type="text" class="form-control" name="token" placeholder="Ingresa tu token" required>
+                        </div>
 
-<?php if(isset($result)): ?>
+                        <div class="mb-3">
+                            <label class="form-label">Departamento</label>
+                            <input type="text" class="form-control" name="departamento" placeholder="Ej: LIMA" required>
+                        </div>
 
-    <h3>Resultado:</h3>
+                        <div class="text-end">
+                            <a href="index.php?action=home" class="btn btn-secondary">Volver</a>
+                            <button type="submit" class="btn btn-success">Consultar</button>
+                        </div>
+                    </form>
 
-    <?php if(isset($result["status"]) && $result["status"] == true): ?>
-
-        <table border="1">
-            <tr>
-                <th>ID</th>
-                <th>Distrito</th>
-                <th>Provincia</th>
-                <th>Departamento</th>
-            </tr>
-
-            <?php foreach($result['contenido'] as $mun): ?>
-                <tr>
-                    <td><?= $mun['id'] ?></td>
-                    <td><?= $mun['distrito'] ?></td>
-                    <td><?= $mun['provincia'] ?></td>
-                    <td><?= $mun['departamento'] ?></td>
-                </tr>
-            <?php endforeach; ?>
-
-        </table>
-
-    <?php else: ?>
-
-        <p style="color:red;"><?= $result['msg'] ?></p>
-
-    <?php endif; ?>
-
-<?php endif; ?>
+                </div>
+            </div>
 
 
-<br><br>
-<a href="index.php?action=home">← Volver</a>
+            <?php if(isset($result)): ?>
 
-</body>
-</html>
+                <div class="card shadow-sm">
+                    <div class="card-header bg-dark text-white">
+                        Resultado
+                    </div>
+                    <div class="card-body">
+
+                        <?php if(isset($result["status"]) && $result["status"] == true): ?>
+
+                            <table class="table table-bordered table-striped">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Distrito</th>
+                                        <th>Provincia</th>
+                                        <th>Departamento</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                <?php foreach($result['contenido'] as $mun): ?>
+                                    <tr>
+                                        <td><?= $mun['id'] ?></td>
+                                        <td><?= $mun['distrito'] ?></td>
+                                        <td><?= $mun['provincia'] ?></td>
+                                        <td><?= $mun['departamento'] ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                                </tbody>
+                            </table>
+
+                        <?php else: ?>
+
+                            <div class="alert alert-danger">
+                                <?= $result['msg'] ?>
+                            </div>
+
+                        <?php endif; ?>
+
+                    </div>
+                </div>
+
+            <?php endif; ?>
+
+        </div>
+    </div>
+
+</div>
+
+<?php $content = ob_get_clean(); include __DIR__."/layout.php"; ?>
