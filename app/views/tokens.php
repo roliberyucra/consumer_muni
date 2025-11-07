@@ -1,34 +1,35 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>Mis Tokens</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="container mt-4">
+<?php ob_start(); ?>
+<?php $title = "Mis Tokens"; ?>
 
-<h2>Tokens Registrados</h2>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h3>Mis Tokens</h3>
+    <a href="index.php?action=newTokenForm" class="btn btn-success btn-sm">+ Nuevo Token</a>
+</div>
 
-<table table bordered>
-<tr>
-    <th>ID</th>
-    <th>Token</th>
-    <th>Acción</th>
-</tr>
+<table class="table table-striped table-bordered bg-white shadow-sm">
+    <thead class="table-dark">
+    <tr>
+        <th>ID</th>
+        <th>Token</th>
+        <th class="text-center">Acción</th>
+    </tr>
+    </thead>
 
-<?php foreach($tokens as $t){ ?>
-<tr>
-    <td><?= $t['id'] ?></td>
-    <td><?= $t['token'] ?></td>
-    <td>
-        <a href="index.php?action=editTokenForm&id=<?= $t['id'] ?>">Editar</a>
-    </td>
-</tr>
-<?php } ?>
-
+    <tbody>
+    <?php foreach($tokens as $t){ ?>
+    <tr>
+        <td><?= $t['id'] ?></td>
+        <td><?= $t['token'] ?></td>
+        <td class="text-center">
+            <a href="index.php?action=editTokenForm&id=<?= $t['id'] ?>" class="btn btn-primary btn-sm">
+                Editar
+            </a>
+        </td>
+    </tr>
+    <?php } ?>
+    </tbody>
 </table>
 
+<a href="index.php?action=home" class="btn btn-secondary mt-3">Volver</a>
 
-<a href="index.php?action=home" class="btn btn-secondary">Volver</a>
-
-</body>
-</html>
+<?php $content = ob_get_clean(); include __DIR__."/layout.php"; ?>
