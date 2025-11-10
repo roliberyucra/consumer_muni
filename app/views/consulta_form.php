@@ -13,20 +13,6 @@
 
 <div class="container">
 
-    <?php
-    // 🔹 Obtener automáticamente el token del usuario actual desde la BD local
-    $stmt = $pdo->prepare("
-        SELECT token 
-        FROM tokens_consumer 
-        WHERE id_usuario = ? 
-        ORDER BY id DESC 
-        LIMIT 1
-    ");
-    $stmt->execute([ $_SESSION['user']['id'] ]);
-    $tokenRow = $stmt->fetch(PDO::FETCH_ASSOC);
-    $token = $tokenRow['token'] ?? '';
-    ?>
-
     <div class="row justify-content-center">
         <div class="col-md-7">
 
@@ -40,7 +26,7 @@
 
                 <div class="card-body">
 
-                    <?php if(!$token): ?>
+                    <?php if(empty($token)): ?>
                         <div class="alert alert-warning">
                             ⚠️ No tienes un token activo. 
                             <a href="index.php?action=tokens" class="alert-link">Actualízalo aquí</a>.
