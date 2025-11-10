@@ -13,21 +13,44 @@
 
 <div class="container">
 
+    <?php
+    // 🔹 Obtener automáticamente el token del usuario actual desde la BD local
+    $stmt = $pdo->prepare("
+        SELECT token 
+        FROM tokens_consumer 
+        WHERE id_usuario = ? 
+        ORDER BY id DESC 
+        LIMIT 1
+    ");
+    $stmt->execute([ $_SESSION['user']['id'] ]);
+    $tokenRow = $stmt->fetch(PDO::FETCH_ASSOC);
+    $token = $tokenRow['token'] ?? '';
+    ?>
+
     <div class="row justify-content-center">
         <div class="col-md-7">
 
             <div class="card shadow-sm mb-4">
-                <div class="card-header bg-primary text-white">
-                    Consultar Municipios
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <span>Consultar Municipios</span>
+                    <a href="index.php?action=actualizarToken" class="btn btn-sm btn-warning text-white">
+                        🔄 Actualizar Token
+                    </a>
                 </div>
+
                 <div class="card-body">
+
+                    <?php if(!$token): ?>
+                        <div class="alert alert-warning">
+                            ⚠️ No tienes un token activo. 
+                            <a href="index.php?action=tokens" class="alert-link">Actualízalo aquí</a>.
+                        </div>
+                    <?php endif; ?>
 
                     <form action="index.php?action=consultarMunicipiosRequest" method="POST">
 
-                        <div class="mb-3">
-                            <label class="form-label">Token</label>
-                            <input type="text" class="form-control" name="token" placeholder="Ingresa tu token" required>
-                        </div>
+                        <!-- TOKEN AUTOMÁTICO -->
+                        <input type="hidden" name="token" value="<?= htmlspecialchars($token) ?>">
 
                         <div class="mb-3">
                             <label class="form-label">Departamento</label>
@@ -43,9 +66,7 @@
                 </div>
             </div>
 
-
             <?php if(isset($result)): ?>
-
                 <div class="card shadow-sm">
                     <div class="card-header bg-dark text-white">
                         Resultado
@@ -53,7 +74,6 @@
                     <div class="card-body">
 
                         <?php if(isset($result["status"]) && $result["status"] == true): ?>
-
                             <table class="table table-bordered table-striped">
                                 <thead class="table-dark">
                                     <tr>
@@ -74,18 +94,14 @@
                                 <?php endforeach; ?>
                                 </tbody>
                             </table>
-
                         <?php else: ?>
-
                             <div class="alert alert-danger">
                                 <?= $result['msg'] ?>
                             </div>
-
                         <?php endif; ?>
 
                     </div>
                 </div>
-
             <?php endif; ?>
 
         </div>
