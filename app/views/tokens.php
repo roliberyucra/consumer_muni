@@ -14,21 +14,27 @@ curl_setopt($ch, CURLOPT_POSTFIELDS, [
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
 $response = curl_exec($ch);
+$curlError = curl_error($ch);
 curl_close($ch);
 
-$json = json_decode($response, true);
+if($curlError){
+    echo "<div class='alert alert-danger'>Error de conexión con API: $curlError</div>";
+    $json = null;
+}else{
+    $json = json_decode($response, true);
+}
 ?>
 
 <div class="card p-4 shadow-sm">
 
-    <?php if($json["status"] == true): ?>
+    <?php if(is_array($json) && isset($json["status"]) && $json["status"] == true): ?>
 
         <div class="alert alert-success">
             Token activo del API:
         </div>
 
         <h5 class="text-primary fw-bold">
-            <?= $json["token"] ?>
+            <?= htmlspecialchars($json["token"]) ?>
         </h5>
 
         <a href="index.php?action=solicitarToken" class="btn btn-danger mt-3">
@@ -47,7 +53,6 @@ $json = json_decode($response, true);
 
     <?php endif; ?>
 </div>
-
 
 <a href="index.php?action=home" class="btn btn-secondary mt-4">← volver</a>
 
