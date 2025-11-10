@@ -2,7 +2,7 @@
 <?php $title = "Token Actual"; ?>
 
 <?php
-$url = "https://www.muni.serviciosvirtuales.com.pe/api.php";
+$url = "https://www.muni.serviciosvirtuales.com.pe/index.php?action=clienteApiRequest";
 
 $ch = curl_init($url);
 curl_setopt($ch, CURLOPT_POST, true);
