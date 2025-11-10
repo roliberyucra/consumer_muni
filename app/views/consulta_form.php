@@ -13,6 +13,21 @@
 
 <div class="container">
 
+    <?php
+    // 🔹 Obtener el token más reciente del usuario actual desde la BD local
+    require __DIR__ . '/../../config/config.php';
+    $stmt = $pdo->prepare("
+        SELECT token 
+        FROM tokens_consumer 
+        WHERE id_usuario = ? 
+        ORDER BY fecha_guardado DESC 
+        LIMIT 1
+    ");
+    $stmt->execute([ $_SESSION['user']['id'] ]);
+    $tokenRow = $stmt->fetch(PDO::FETCH_ASSOC);
+    $token = $tokenRow['token'] ?? '';
+    ?>
+
     <div class="row justify-content-center">
         <div class="col-md-7">
 
@@ -22,12 +37,17 @@
                 </div>
                 <div class="card-body">
 
+                    <?php if(!$token): ?>
+                        <div class="alert alert-warning">
+                            ⚠️ No tienes un token activo. 
+                            <a href="index.php?action=tokens" class="alert-link">Genera o actualiza tu token aquí</a>.
+                        </div>
+                    <?php endif; ?>
+
                     <form action="index.php?action=consultarMunicipiosRequest" method="POST">
 
-                        <div class="mb-3">
-                            <label class="form-label">Token</label>
-                            <input type="text" class="form-control" name="token" placeholder="Ingresa tu token" required>
-                        </div>
+                        <!-- TOKEN AUTOMÁTICO DESDE LA BD -->
+                        <input type="hidden" name="token" value="<?= htmlspecialchars($token) ?>">
 
                         <div class="mb-3">
                             <label class="form-label">Departamento</label>
@@ -43,9 +63,7 @@
                 </div>
             </div>
 
-
             <?php if(isset($result)): ?>
-
                 <div class="card shadow-sm">
                     <div class="card-header bg-dark text-white">
                         Resultado
@@ -53,7 +71,6 @@
                     <div class="card-body">
 
                         <?php if(isset($result["status"]) && $result["status"] == true): ?>
-
                             <table class="table table-bordered table-striped">
                                 <thead class="table-dark">
                                     <tr>
@@ -74,18 +91,14 @@
                                 <?php endforeach; ?>
                                 </tbody>
                             </table>
-
                         <?php else: ?>
-
                             <div class="alert alert-danger">
                                 <?= $result['msg'] ?>
                             </div>
-
                         <?php endif; ?>
 
                     </div>
                 </div>
-
             <?php endif; ?>
 
         </div>
