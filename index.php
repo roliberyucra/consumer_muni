@@ -33,15 +33,22 @@ switch($action){
 
     $json = json_decode($response, true);
 
-    if($json["status"] == true) {
-        $_SESSION['ultimo_token'] = $json["token"];
-        $mensaje = "Token generado correctamente!";
-    } else {
-        $mensaje = "Error al generar token";
-    }
-
+if(!is_array($json)){
+    $mensaje = "No hubo respuesta válida del servidor API";
     include __DIR__."/app/views/home.php";
     break;
+}
+
+if(isset($json["status"]) && $json["status"] == true){
+    $_SESSION['ultimo_token'] = $json["token"] ?? "";
+    $mensaje = "Token generado correctamente!";
+} else {
+    $mensaje = $json["msg"] ?? "Error desconocido al generar token";
+}
+
+include __DIR__."/app/views/home.php";
+break;
+
 
 
     case 'tokens':
