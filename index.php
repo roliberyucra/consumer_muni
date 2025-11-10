@@ -74,17 +74,13 @@ case 'solicitarToken':
 /* ==========================================================
    🔄 ACTUALIZAR TOKEN LOCAL (sincroniza con API principal)
    ========================================================== */
-   case 'actualizarToken':
+case 'actualizarToken':
     if (!isset($_SESSION['user'])) {
         header("Location: index.php?action=loginForm");
         exit;
     }
 
-    // Determinar desde dónde viene la actualización
-    $from = $_GET['from'] ?? 'tokens';
-
-    // Llamar al API para obtener el último token generado
-    $api_url = "https://www.muni.serviciosvirtuales.com.pe/muni/api.php?tipo=getLastToken";
+    $api_url = "https://www.muni.serviciosvirtuales.com.pe/api.php?tipo=getLastToken";
     $ch = curl_init($api_url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     $response = curl_exec($ch);
@@ -93,35 +89,29 @@ case 'solicitarToken':
     $json = json_decode($response, true);
 
     if (!$json || !isset($json["status"]) || $json["status"] !== true) {
-        echo "<script>alert('No se pudo obtener el token desde el API.');window.location='index.php?action=$from';</script>";
+        echo "<script>alert('No se pudo obtener el token desde el API.');window.location='index.php?action=tokens';</script>";
         exit;
     }
 
     $token_api = $json["token"];
-    $expira    = $json["expiracion"];
-    $estado    = $json["estado"];
+    $expira    = $json["expiracion"] ?? null;
+    $estado    = $json["estado"] ?? 0;
 
-    // Guardar o actualizar el token en BD local
+    // Guardar o actualizar en la BD local
     $stmt = $pdo->prepare("SELECT id FROM tokens_consumer WHERE id_usuario=?");
-    $stmt->execute([ $_SESSION['user']['id'] ]);
+    $stmt->execute([$_SESSION['user']['id']]);
     $exists = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if($exists){
-        $stmt = $pdo->prepare("UPDATE tokens_consumer SET token=?, expiracion=?, estado=? WHERE id_usuario=?");
+    if ($exists) {
+        $stmt = $pdo->prepare("UPDATE tokens_consumer SET token=?, expiracion=?, estado=?, fecha_guardado=NOW() WHERE id_usuario=?");
         $stmt->execute([$token_api, $expira, $estado, $_SESSION['user']['id']]);
     } else {
-        $stmt = $pdo->prepare("INSERT INTO tokens_consumer(id_usuario, token, expiracion, estado) VALUES (?,?,?,?)");
+        $stmt = $pdo->prepare("INSERT INTO tokens_consumer (id_usuario, token, expiracion, estado, fecha_guardado) VALUES (?, ?, ?, ?, NOW())");
         $stmt->execute([$_SESSION['user']['id'], $token_api, $expira, $estado]);
     }
 
-    // Redirigir al origen correcto
-    if ($from === 'consulta') {
-        header("Location: index.php?action=homeConsulta&msg=ok");
-    } else {
-        header("Location: index.php?action=tokens&msg=ok");
-    }
+    header("Location: index.php?action=tokens&msg=ok");
     exit;
-
     break;
 
 
