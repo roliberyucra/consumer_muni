@@ -21,7 +21,7 @@ switch($action){
         exit;
     }
 
-    $ch = curl_init("http://127.0.0.1:8888/muni/api.php");
+    $ch = curl_init("https://www.muni.serviciosvirtuales.com.pe/api.php");
     curl_setopt($ch, CURLOPT_POST, true);
     curl_setopt($ch, CURLOPT_POSTFIELDS, [
         "tipo" => "generarToken"
