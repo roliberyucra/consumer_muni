@@ -1,9 +1,9 @@
 <?php
 
 $host = "localhost";
-$dbname = "servirt_consumer";
-$user = "servirt_consumer";
-$pass = "7ckngMad"; // XAMPP Windows -> contraseña vacía
+$dbname = "consumer_db";
+$user = "root";
+$pass = ""; // XAMPP Windows -> contraseña vacía
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $user, $pass);
