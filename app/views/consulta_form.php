@@ -5,7 +5,8 @@
   <div class="container-fluid">
     <span class="navbar-brand">Consumer API</span>
     <div class="d-flex">
-        <a href="index.php?action=home" class="btn btn-outline-secondary btn-sm me-2">Inicio</a>
+    <a href="index.php?action=home" class="btn btn-outline-secondary btn-sm me-2">Inicio</a>
+
         <a href="index.php?action=logout" class="btn btn-outline-danger btn-sm">Salir</a>
     </div>
   </div>
@@ -19,9 +20,10 @@
             <div class="card shadow-sm mb-4">
                 <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                     <span>Consultar Municipios</span>
-                    <a href="index.php?action=actualizarToken" class="btn btn-sm btn-warning text-white">
-                        🔄 Actualizar Token
-                    </a>
+                    <a href="index.php?action=actualizarToken&from=consulta" class="btn btn-sm btn-warning text-white">
+    🔄 Actualizar Token
+</a>
+
                 </div>
 
                 <div class="card-body">
@@ -44,7 +46,7 @@
                         </div>
 
                         <div class="text-end">
-                            <a href="index.php?action=home" class="btn btn-secondary">Volver</a>
+                        <a href="index.php?action=home" class="btn btn-secondary">Volver</a>
                             <button type="submit" class="btn btn-success">Consultar</button>
                         </div>
                     </form>
