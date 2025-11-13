@@ -25,7 +25,7 @@ case 'solicitarToken':
     }
 
     // Llamar al API principal para generar token nuevo
-    $ch = curl_init("https://www.muni.serviciosvirtuales.com.pe/muni/api.php");
+    $ch = curl_init("https://www.muni.serviciosvirtuales.com.pe/api.php");
     curl_setopt($ch, CURLOPT_POST, true);
     curl_setopt($ch, CURLOPT_POSTFIELDS, ["tipo" => "generarToken"]);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -74,7 +74,7 @@ case 'actualizarToken':
         exit;
     }
 
-    $api_url = "https://www.muni.serviciosvirtuales.com.pe/muni/api.php?tipo=getLastToken";
+    $api_url = "https://www.muni.serviciosvirtuales.com.pe/api.php?tipo=getLastToken";
     $ch = curl_init($api_url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     $response = curl_exec($ch);
