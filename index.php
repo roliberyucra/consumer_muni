@@ -24,45 +24,51 @@ case 'solicitarToken':
         exit;
     }
 
-    // Llamar al API principal para generar token nuevo
-    $ch = curl_init("https://www.muni.serviciosvirtuales.com.pe/api.php");
+    // 🔹 Llamar al API principal para generar un nuevo token
+    $api_url = "https://www.muni.serviciosvirtuales.com.pe/muni/api.php";
+    $ch = curl_init($api_url);
     curl_setopt($ch, CURLOPT_POST, true);
     curl_setopt($ch, CURLOPT_POSTFIELDS, ["tipo" => "generarToken"]);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // evitar errores SSL
     $response = curl_exec($ch);
+
+    if ($response === false) {
+        die("❌ CURL ERROR: " . curl_error($ch));
+    }
+
     curl_close($ch);
 
     $json = json_decode($response, true);
 
-    if (!$json || !isset($json["status"])) {
-        echo "<script>alert('No hubo respuesta válida del servidor API.');window.location='index.php?action=tokens';</script>";
+    // Validar respuesta del API
+    if (!$json || !isset($json["status"]) || $json["status"] !== true) {
+        echo "<script>alert('Error al generar token en el API');window.location='index.php?action=tokens';</script>";
         exit;
     }
 
-    if ($json["status"] === true) {
-        $token_api = $json["token"];
-        $expira    = $json["expira"] ?? null;
+    // 🔹 Datos recibidos
+    $token_api = $json["token"];
+    $expira    = $json["expira"];
+    $estado    = 1;
 
-        // Guardar o actualizar token local
-        $stmt = $pdo->prepare("SELECT id FROM tokens_consumer WHERE id_usuario=?");
-        $stmt->execute([$_SESSION['user']['id']]);
-        $exists = $stmt->fetch(PDO::FETCH_ASSOC);
+    // 🔹 Guardar en BD local del consumer
+    $stmt = $pdo->prepare("SELECT id FROM tokens_consumer WHERE id_usuario=?");
+    $stmt->execute([$_SESSION['user']['id']]);
+    $exists = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if ($exists) {
-            $stmt = $pdo->prepare("UPDATE tokens_consumer SET token=?, fecha_guardado=NOW() WHERE id_usuario=?");
-            $stmt->execute([$token_api, $_SESSION['user']['id']]);
-        } else {
-            $stmt = $pdo->prepare("INSERT INTO tokens_consumer (id_usuario, token, fecha_guardado) VALUES (?, ?, NOW())");
-            $stmt->execute([$_SESSION['user']['id'], $token_api]);
-        }
-
-        header("Location: index.php?action=tokens&msg=nuevo");
-        exit;
+    if ($exists) {
+        $stmt = $pdo->prepare("UPDATE tokens_consumer SET token=?, expiracion=?, estado=? WHERE id_usuario=?");
+        $stmt->execute([$token_api, $expira, $estado, $_SESSION['user']['id']]);
     } else {
-        echo "<script>alert('Error al generar el token: " . ($json['msg'] ?? 'Desconocido') . "');window.location='index.php?action=tokens';</script>";
-        exit;
+        $stmt = $pdo->prepare("INSERT INTO tokens_consumer(id_usuario, token, expiracion, estado) VALUES (?,?,?,?)");
+        $stmt->execute([$_SESSION['user']['id'], $token_api, $expira, $estado]);
     }
-    break;
+
+    // Redirige a la vista tokens
+    header("Location: index.php?action=tokens&msg=ok");
+    exit;
+
 
 
 /* ==========================================================
