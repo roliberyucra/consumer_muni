@@ -21,6 +21,50 @@ switch($action){
         exit;
     }
 
+        /* === ACTUALIZAR TOKEN LOCAL === */
+    case 'actualizarToken':
+        if (!isset($_SESSION['user'])) {
+            header("Location: index.php?action=loginForm");
+            exit;
+        }
+
+        // 🔹 Llamar al API para obtener el último token generado
+        $api_url = "https://www.muni.serviciosvirtuales.com.pe/muni/api.php?tipo=getLastToken";
+        $ch = curl_init($api_url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $response = curl_exec($ch);
+        curl_close($ch);
+
+        $json = json_decode($response, true);
+
+        if (!$json || !isset($json["status"]) || $json["status"] !== true) {
+            echo "<script>alert('No se pudo obtener el token desde el API.');window.location='index.php?action=tokens';</script>";
+            exit;
+        }
+
+        $token_api = $json["token"];
+        $expira    = $json["expiracion"];
+        $estado    = $json["estado"];
+
+        // 🔹 Verificar si ya existe token en BD local
+        $stmt = $pdo->prepare("SELECT id FROM tokens_consumer WHERE id_usuario=?");
+        $stmt->execute([ $_SESSION['user']['id'] ]);
+        $exists = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if($exists){
+            $stmt = $pdo->prepare("UPDATE tokens_consumer SET token=?, expiracion=?, estado=? WHERE id_usuario=?");
+            $stmt->execute([$token_api, $expira, $estado, $_SESSION['user']['id']]);
+        } else {
+            $stmt = $pdo->prepare("INSERT INTO tokens_consumer(id_usuario, token, expiracion, estado) VALUES (?,?,?,?)");
+            $stmt->execute([$_SESSION['user']['id'], $token_api, $expira, $estado]);
+        }
+
+        // Redirige con mensaje SweetAlert
+        header("Location: index.php?action=tokens&msg=ok");
+        exit;
+    break;
+
+
     $ch = curl_init("https://www.muni.serviciosvirtuales.com.pe/api.php");
     curl_setopt($ch, CURLOPT_POST, true);
     curl_setopt($ch, CURLOPT_POSTFIELDS, [
