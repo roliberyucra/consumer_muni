@@ -15,233 +15,169 @@ $action = $_GET['action'] ?? 'loginForm';
 
 switch($action){
 
-    case 'solicitarToken':
+/* ==========================================================
+   🟢 SOLICITAR TOKEN NUEVO (genera uno desde el API)
+   ========================================================== */
+case 'solicitarToken':
     if (!isset($_SESSION['user'])) {
         header("Location: index.php?action=loginForm");
         exit;
     }
 
-        /* === ACTUALIZAR TOKEN LOCAL === */
-    case 'actualizarToken':
-        if (!isset($_SESSION['user'])) {
-            header("Location: index.php?action=loginForm");
-            exit;
-        }
-
-        // 🔹 Llamar al API para obtener el último token generado
-        $api_url = "https://www.muni.serviciosvirtuales.com.pe/muni/api.php?tipo=getLastToken";
-        $ch = curl_init($api_url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        $response = curl_exec($ch);
-        curl_close($ch);
-
-        $json = json_decode($response, true);
-
-        if (!$json || !isset($json["status"]) || $json["status"] !== true) {
-            echo "<script>alert('No se pudo obtener el token desde el API.');window.location='index.php?action=tokens';</script>";
-            exit;
-        }
-
-        $token_api = $json["token"];
-        $expira    = $json["expiracion"];
-        $estado    = $json["estado"];
-
-        // 🔹 Verificar si ya existe token en BD local
-        $stmt = $pdo->prepare("SELECT id FROM tokens_consumer WHERE id_usuario=?");
-        $stmt->execute([ $_SESSION['user']['id'] ]);
-        $exists = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if($exists){
-            $stmt = $pdo->prepare("UPDATE tokens_consumer SET token=?, expiracion=?, estado=? WHERE id_usuario=?");
-            $stmt->execute([$token_api, $expira, $estado, $_SESSION['user']['id']]);
-        } else {
-            $stmt = $pdo->prepare("INSERT INTO tokens_consumer(id_usuario, token, expiracion, estado) VALUES (?,?,?,?)");
-            $stmt->execute([$_SESSION['user']['id'], $token_api, $expira, $estado]);
-        }
-
-        // Redirige con mensaje SweetAlert
-        header("Location: index.php?action=tokens&msg=ok");
-        exit;
-    break;
-
-
-    $ch = curl_init("https://www.muni.serviciosvirtuales.com.pe/api.php");
+    // Llamar al API principal para generar token nuevo
+    $ch = curl_init("https://www.muni.serviciosvirtuales.com.pe/muni/api.php");
     curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, [
-        "tipo" => "generarToken"
-    ]);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, ["tipo" => "generarToken"]);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-
     $response = curl_exec($ch);
     curl_close($ch);
 
     $json = json_decode($response, true);
 
-if(!is_array($json)){
-    $mensaje = "No hubo respuesta válida del servidor API";
-    include __DIR__."/app/views/home.php";
+    if (!$json || !isset($json["status"])) {
+        echo "<script>alert('No hubo respuesta válida del servidor API.');window.location='index.php?action=tokens';</script>";
+        exit;
+    }
+
+    if ($json["status"] === true) {
+        $token_api = $json["token"];
+        $expira    = $json["expira"] ?? null;
+
+        // Guardar o actualizar token local
+        $stmt = $pdo->prepare("SELECT id FROM tokens_consumer WHERE id_usuario=?");
+        $stmt->execute([$_SESSION['user']['id']]);
+        $exists = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($exists) {
+            $stmt = $pdo->prepare("UPDATE tokens_consumer SET token=?, fecha_guardado=NOW() WHERE id_usuario=?");
+            $stmt->execute([$token_api, $_SESSION['user']['id']]);
+        } else {
+            $stmt = $pdo->prepare("INSERT INTO tokens_consumer (id_usuario, token, fecha_guardado) VALUES (?, ?, NOW())");
+            $stmt->execute([$_SESSION['user']['id'], $token_api]);
+        }
+
+        header("Location: index.php?action=tokens&msg=nuevo");
+        exit;
+    } else {
+        echo "<script>alert('Error al generar el token: " . ($json['msg'] ?? 'Desconocido') . "');window.location='index.php?action=tokens';</script>";
+        exit;
+    }
     break;
-}
-
-if(isset($json["status"]) && $json["status"] == true){
-    $_SESSION['ultimo_token'] = $json["token"] ?? "";
-    $mensaje = "Token generado correctamente!";
-} else {
-    $mensaje = $json["msg"] ?? "Error desconocido al generar token";
-}
-
-include __DIR__."/app/views/home.php";
-break;
 
 
-
-    case 'tokens':
-        if (!isset($_SESSION['user'])) {
-            header("Location: index.php?action=loginForm");
-            exit;
-        }
-    
-        // traer tokens del usuario logueado
-        $stmt = $pdo->prepare("SELECT * FROM tokens_consumer WHERE id_usuario = ?");
-        $stmt->execute([ $_SESSION['user']['id'] ]);
-        $tokens = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    
-        include __DIR__."/app/views/tokens.php";
-        break;
-    
-    
-    case 'newTokenForm':
-        if (!isset($_SESSION['user'])) {
-            header("Location: index.php?action=loginForm");
-            exit;
-        }
-        include __DIR__."/app/views/new_token.php";
-        break;
-
-    case 'homeConsulta':
-        include __DIR__."/app/views/consulta_form.php";
-        break;
-
-        case 'saveToken':
-
-            if (!isset($_SESSION['user'])) {
-                header("Location: index.php?action=loginForm");
-                exit;
-            }
-        
-            if($_SERVER['REQUEST_METHOD'] === 'POST'){
-        
-                $token = trim($_POST['token']);
-        
-                if($token == ""){
-                    $error = "Token vacío";
-                    include __DIR__."/app/views/new_token.php";
-                    exit;
-                }
-        
-                // insertarlo en la BD consumer
-                $stmt = $pdo->prepare("INSERT INTO tokens_consumer(id_usuario, token) VALUES(?,?)");
-                $stmt->execute([ $_SESSION['user']['id'], $token ]);
-        
-                $success = "Token guardado correctamente";
-                include __DIR__."/app/views/new_token.php";
-            }
-        
-            break;
-
-        case 'editTokenForm':
+/* ==========================================================
+   🔄 ACTUALIZAR TOKEN LOCAL (sincroniza con API principal)
+   ========================================================== */
+case 'actualizarToken':
     if (!isset($_SESSION['user'])) {
         header("Location: index.php?action=loginForm");
         exit;
     }
 
-    $id = $_GET['id'];
+    $api_url = "https://www.muni.serviciosvirtuales.com.pe/muni/api.php?tipo=getLastToken";
+    $ch = curl_init($api_url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    $response = curl_exec($ch);
+    curl_close($ch);
 
-    $stmt = $pdo->prepare("SELECT * FROM tokens_consumer WHERE id=? AND id_usuario=?");
-    $stmt->execute([$id, $_SESSION['user']['id']]);
-    $token_bd = $stmt->fetch(PDO::FETCH_ASSOC);
+    $json = json_decode($response, true);
 
-    include __DIR__."/app/views/edit_token.php";
+    if (!$json || !isset($json["status"]) || $json["status"] !== true) {
+        echo "<script>alert('No se pudo obtener el token desde el API.');window.location='index.php?action=tokens';</script>";
+        exit;
+    }
+
+    $token_api = $json["token"];
+    $expira    = $json["expiracion"] ?? null;
+    $estado    = $json["estado"] ?? 0;
+
+    // Guardar o actualizar en la BD local
+    $stmt = $pdo->prepare("SELECT id FROM tokens_consumer WHERE id_usuario=?");
+    $stmt->execute([$_SESSION['user']['id']]);
+    $exists = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($exists) {
+        $stmt = $pdo->prepare("UPDATE tokens_consumer SET token=?, expiracion=?, estado=?, fecha_guardado=NOW() WHERE id_usuario=?");
+        $stmt->execute([$token_api, $expira, $estado, $_SESSION['user']['id']]);
+    } else {
+        $stmt = $pdo->prepare("INSERT INTO tokens_consumer (id_usuario, token, expiracion, estado, fecha_guardado) VALUES (?, ?, ?, ?, NOW())");
+        $stmt->execute([$_SESSION['user']['id'], $token_api, $expira, $estado]);
+    }
+
+    header("Location: index.php?action=tokens&msg=ok");
+    exit;
     break;
 
 
-case 'updateToken':
+/* ==========================================================
+   🧾 LISTADO DE TOKENS LOCALES
+   ========================================================== */
+case 'tokens':
     if (!isset($_SESSION['user'])) {
         header("Location: index.php?action=loginForm");
         exit;
     }
 
-    if($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $stmt = $pdo->prepare("SELECT * FROM tokens_consumer WHERE id_usuario = ?");
+    $stmt->execute([ $_SESSION['user']['id'] ]);
+    $tokens = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        $id    = $_POST['id'];
-        $token = trim($_POST['token']);
+    include __DIR__."/app/views/tokens.php";
+    break;
 
-        $stmt = $pdo->prepare("UPDATE tokens_consumer SET token=? WHERE id=? AND id_usuario=?");
-        $stmt->execute([$token, $id, $_SESSION['user']['id']]);
 
-        header("Location: index.php?action=tokens");
-        exit;
+/* ==========================================================
+   🔑 LOGIN / LOGOUT / HOME / CONSULTAS
+   ========================================================== */
+case 'loginForm':
+    $authController->loginForm();
+    break;
+
+case 'login':
+    if($_SERVER['REQUEST_METHOD'] === 'POST'){
+        $authController->login($_POST);
     }
     break;
 
-        
-        
-    
-    /* LOGIN */
-    case 'loginForm':
-        $authController->loginForm();
-        break;
+case 'logout':
+    $authController->logout();
+    break;
 
-    case 'login':
-        if($_SERVER['REQUEST_METHOD'] === 'POST'){
-            $authController->login($_POST);
-        }
-        break;
+case 'home':
+    if (!isset($_SESSION['user'])) {
+        header("Location: index.php?action=loginForm");
+        exit;
+    }
+    $apiController->form();
+    break;
 
-    case 'logout':
-        $authController->logout();
-        break;
+case 'homeConsulta':
+    include __DIR__."/app/views/consulta_form.php";
+    break;
 
+case 'consultarApi':
+    if (!isset($_SESSION['user'])) {
+        header("Location: index.php?action=loginForm");
+        exit;
+    }
+    if($_SERVER['REQUEST_METHOD'] === 'POST'){
+        $apiController->consultar($_POST);
+    }
+    break;
 
-    /* HOME (vista principal) */
-    case 'home':
-        if (!isset($_SESSION['user'])) {
-            header("Location: index.php?action=loginForm");
-            exit;
-        }
-        $apiController->form();
-        break;
-
-
-    /* CONSUMO API */
-    case 'consultarApi':
-        if (!isset($_SESSION['user'])) {
-            header("Location: index.php?action=loginForm");
-            exit;
-        }
-        if($_SERVER['REQUEST_METHOD'] === 'POST'){
-            $apiController->consultar($_POST);
-        }
-        break;
-
-        case 'consultaMunicipios':
-            if (!isset($_SESSION['user'])) {
-                header("Location: index.php?action=loginForm");
-                exit;
-            }
-            include __DIR__ . "/app/views/consulta_form.php";
-            break;
-    
-        case 'consultarMunicipiosRequest':
-            if (!isset($_SESSION['user'])) {
-                header("Location: index.php?action=loginForm");
-                exit;
-            }
-            $apiController->consultar($_POST);
-            break;
-    
+case 'consultarMunicipiosRequest':
+    if (!isset($_SESSION['user'])) {
+        header("Location: index.php?action=loginForm");
+        exit;
+    }
+    $apiController->consultar($_POST);
+    break;
 
 
-    default:
-        echo "Acción no válida.";
+/* ==========================================================
+   ⚠️ DEFAULT
+   ========================================================== */
+default:
+    echo "Acción no válida.";
 }
+?>
