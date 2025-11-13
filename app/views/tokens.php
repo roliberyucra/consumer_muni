@@ -9,9 +9,9 @@
             <p class="text-muted">Tu token local está sincronizado con el sistema principal (API).</p>
         </div>
         <div class="col-md-4 text-end">
-            <!-- <a href="index.php?action=solicitarToken" class="btn btn-success me-2">
+            <a href="index.php?action=solicitarToken" class="btn btn-success me-2">
                 <i class="bi bi-plus-circle"></i> Generar Nuevo Token
-            </a> -->
+            </a>
             <a href="index.php?action=actualizarToken" class="btn btn-info text-white">
                 <i class="bi bi-arrow-repeat"></i> Actualizar Token
             </a>

@@ -19,10 +19,8 @@
 
 <div class="row justify-content-center">
 
-<!--
     <a href="index.php?action=solicitarToken" class="btn btn-success">Solicitar Token</a>
--->
-    
+
     <div class="col-md-4">
         <div class="card text-center shadow-sm">
             <div class="card-body">
