@@ -89,7 +89,7 @@
         <i class="bi bi-building"></i>
     </div>
 
-    <h3 class="title">Consumer API</h3>
+    <h3 class="title">Busca MUNI</h3>
     <p class="subtitle">Acceso al sistema de consulta de municipalidades</p>
 
     <?php if(isset($error)): ?>

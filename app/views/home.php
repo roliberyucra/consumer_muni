@@ -71,7 +71,7 @@
     <!-- Hero -->
     <div class="hero text-center">
         <h2 class="fw-bold mb-1">Bienvenido al Sistema de Consulta Municipal</h2>
-        <p class="mb-0" style="opacity:.9;">Gestiona tus tokens y realiza búsquedas rápidas y seguras</p>
+        <p class="mb-0" style="opacity:.9;">Gestiona y realiza búsquedas rápidas y seguras</p>
     </div>
 
     <!-- Mostrar token generado -->
@@ -107,7 +107,7 @@
                 </div>
                 <h5 class="fw-bold">Consultar Municipios</h5>
                 <p class="text-muted small mb-3">
-                    Consulta distritos y provincias usando un token activo.
+                    Consulta departamentos, distritos y provincias usando un token.
                 </p>
                 <a href="index.php?action=homeConsulta" class="btn btn-success w-100">Consultar</a>
             </div>
